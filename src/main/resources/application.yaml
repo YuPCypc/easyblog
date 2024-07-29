@@ -1,0 +1,15 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: easyblog
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/link?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: f8k7Lg0Z1yVrM4t9NpOi3Xc2Hw7Dq4B5d6Jv1Kl8BnR2Tg9SxV0YpZ5Cw8Uj7A3L
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
