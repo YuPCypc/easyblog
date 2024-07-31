@@ -58,6 +58,11 @@ public class UserDO {
     private String password;
 
     /**
+     * salt
+     */
+    private String salt;
+
+    /**
      * delete_time
      */
     private Date deleteTime;

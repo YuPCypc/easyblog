@@ -5,7 +5,7 @@ import java.util.Random;
 public class GenerateRandom {
 
     public static String generateRandomText() {
-        int length = 6;
+        int length = 4;
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();
         StringBuilder text = new StringBuilder(length);

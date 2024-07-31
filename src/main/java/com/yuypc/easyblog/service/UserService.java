@@ -5,6 +5,7 @@ import com.yuypc.easyblog.dao.entity.UserDO;
 import com.yuypc.easyblog.dto.req.UserLoginReqDTO;
 import com.yuypc.easyblog.dto.req.UserRegisterReqDTO;
 import com.yuypc.easyblog.dto.req.UserUpdateReqDTO;
+import com.yuypc.easyblog.dto.resp.CheckLoginRespDTO;
 import com.yuypc.easyblog.dto.resp.UserLoginRespDTO;
 import com.yuypc.easyblog.dto.resp.UserRespDTO;
 
@@ -16,12 +17,6 @@ public interface UserService extends IService<UserDO> {
      */
     UserRespDTO getUserByUsername(String username);
 
-    /**
-     * 根据邮箱查找用户信息
-     * @param email
-     * @return 用户返回实体
-     */
-    UserRespDTO getUserByEmail(String email);
 
     /**
      * 查询用户名是否已存在
@@ -41,7 +36,7 @@ public interface UserService extends IService<UserDO> {
      * 注册用户
      * @param requestParam 注册用户参数
      */
-    void register(UserRegisterReqDTO requestParam);
+    UserLoginRespDTO register(UserRegisterReqDTO requestParam);
 
     /**
      * 修改用户
@@ -61,7 +56,7 @@ public interface UserService extends IService<UserDO> {
      * @param token
      * @return
      */
-    Boolean checkLogin(String username,String token);
+    CheckLoginRespDTO checkLogin(String token);
 
     /**
      * 用户登出
@@ -70,4 +65,6 @@ public interface UserService extends IService<UserDO> {
      * @return
      */
     Void logout(String username,String token);
+
+    void updateAvatar(String currentUsername, String avatarUrl);
 }

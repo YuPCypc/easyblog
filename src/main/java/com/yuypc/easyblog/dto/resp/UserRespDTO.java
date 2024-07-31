@@ -15,6 +15,16 @@ public class UserRespDTO {
     private String username;
 
     /**
+     * password
+     */
+    private String password;
+
+    /**
+     * salt
+     */
+    private String salt;
+
+    /**
      * nickname
      */
     private String nickname;

@@ -18,7 +18,7 @@ import java.util.Random;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/captcha")
+@RequestMapping("/auth/captcha")
 @Slf4j
 public class CaptchaController {
 
