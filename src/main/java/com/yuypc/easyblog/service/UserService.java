@@ -8,6 +8,7 @@ import com.yuypc.easyblog.dto.req.UserUpdateReqDTO;
 import com.yuypc.easyblog.dto.resp.CheckLoginRespDTO;
 import com.yuypc.easyblog.dto.resp.UserLoginRespDTO;
 import com.yuypc.easyblog.dto.resp.UserRespDTO;
+import com.yuypc.easyblog.dto.resp.UserRespVO;
 
 public interface UserService extends IService<UserDO> {
     /**
@@ -67,4 +68,8 @@ public interface UserService extends IService<UserDO> {
     Void logout(String username,String token);
 
     void updateAvatar(String currentUsername, String avatarUrl);
+
+    String getCurrentUsername();
+
+    UserRespVO getUserByUserId(Long authorId);
 }
