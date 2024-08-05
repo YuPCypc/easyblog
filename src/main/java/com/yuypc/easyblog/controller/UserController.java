@@ -51,6 +51,9 @@ public class UserController {
         return Results.success(userService.checkLogin(token));
     }
 
+    /**
+     * 用户更新信息
+     */
     @PostMapping("/update")
     public Result<Void> update(@RequestBody UserUpdateReqDTO requestParam) {
         userService.update(requestParam);

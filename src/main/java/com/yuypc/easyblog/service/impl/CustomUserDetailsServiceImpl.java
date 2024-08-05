@@ -3,7 +3,6 @@ package com.yuypc.easyblog.service.impl;
 import com.yuypc.easyblog.dto.resp.UserRespDTO;
 import com.yuypc.easyblog.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

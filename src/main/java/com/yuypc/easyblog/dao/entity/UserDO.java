@@ -16,7 +16,7 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDO {
+public class UserDO extends BaseDO {
     /**
      * id
      */
@@ -61,24 +61,4 @@ public class UserDO {
      * salt
      */
     private String salt;
-
-    /**
-     * delete_time
-     */
-    private Date deleteTime;
-
-    /**
-     * update_time
-     */
-    private Date updateTime;
-
-    /**
-     * create_time
-     */
-    private Date createTime;
-
-    /**
-     * is_deleted
-     */
-    private Boolean isDeleted;
 }

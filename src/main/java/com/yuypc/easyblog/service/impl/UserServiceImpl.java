@@ -32,15 +32,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private JwtTokenProvider jwtTokenProvider;
 
 
-
-
-    private String getCurrentUsername() {
+    public String getCurrentUsername() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
             return ((UserDetails) principal).getUsername();
         } else {
             return principal.toString();
         }
+    }
+
+    @Override
+    public UserRespVO getUserByUserId(Long authorId) {
+        UserDO userDO = baseMapper.selectById(authorId);
+        return BeanUtil.toBean(userDO, UserRespVO.class);
     }
 
     @Override
