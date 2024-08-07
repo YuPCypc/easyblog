@@ -75,6 +75,38 @@ public class FileUploadController {
         }
     }
 
+    @PostMapping("/upload-file")
+    public ResponseEntity<?> uploadPic(MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        try {
+            // Save the file temporarily
+            File tempFile = File.createTempFile("pic", file.getOriginalFilename());
+            file.transferTo(tempFile);
+
+            String currentUsername = getCurrentUsername();
+
+            // Upload to OSS
+            OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+            String fileName = currentUsername+"/article/pic/" + tempFile.getName();
+            ossClient.putObject(bucketName, fileName, tempFile);
+            Date expiration = new Date(System.currentTimeMillis() + 3600L * 1000 * 24 * 30);
+            String picUrl = ossClient.generatePresignedUrl(bucketName, fileName, expiration).toString(); // Generate URL valid for 1 month
+
+            // Clean up local file
+            tempFile.delete();
+            ossClient.shutdown();
+
+
+            return ResponseEntity.ok(new UploadPicResponse(picUrl));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to upload file");
+        }
+    }
+
     private String getCurrentUsername() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -82,6 +114,22 @@ public class FileUploadController {
         } else {
             return principal.toString();
         }
+    }
+    private static class UploadPicResponse{
+        private String picUrl;
+
+        public UploadPicResponse(String url) {
+            this.picUrl = url;
+        }
+
+        public String getPicUrl() {
+            return picUrl;
+        }
+
+        public void setPicUrl(String picUrl) {
+            this.picUrl = picUrl;
+        }
+
     }
 
     private static class AvatarResponse {
