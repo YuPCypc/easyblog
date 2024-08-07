@@ -104,6 +104,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
                 .likeCount(articleDO.getLikeCount())
                 .viewCount(articleDO.getViewCount())
                 .favoriteCount(articleDO.getFavoriteCount())
+                .updateTime(articleDO.getUpdateTime())
+                .categoryId(articleDO.getCategoryId())
                 .build();
         return articleDetailRespDTOInner;
     }

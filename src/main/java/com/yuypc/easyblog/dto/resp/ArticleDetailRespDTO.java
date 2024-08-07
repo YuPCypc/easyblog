@@ -3,6 +3,8 @@ package com.yuypc.easyblog.dto.resp;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Date;
+
 @Builder
 @Data
 public class ArticleDetailRespDTO {
@@ -40,4 +42,9 @@ public class ArticleDetailRespDTO {
      * favorite_count
      */
     private Integer favoriteCount;
+
+    /**
+     * update_time
+     */
+    private Date updateTime;
 }
