@@ -1,7 +1,9 @@
 package com.yuypc.easyblog.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuypc.easyblog.dto.req.ArticleListReqDTO;
 import com.yuypc.easyblog.dto.req.ArticleUploadReqDTO;
+import com.yuypc.easyblog.dto.resp.ArticleDetailRespDTO;
 import com.yuypc.easyblog.dto.resp.ArticleRespDTO;
 
 import java.util.List;
@@ -19,5 +21,7 @@ public interface ArticleService {
     /**
      * 获取文章列表
      */
-    List<ArticleRespDTO> getMultiArticles(ArticleListReqDTO articleListReqDTO);
+    IPage<ArticleRespDTO> getMultiArticles(ArticleListReqDTO articleListReqDTO);
+
+    ArticleDetailRespDTO getArticleDetail(Long id);
 }

@@ -1,17 +1,17 @@
 package com.yuypc.easyblog.controller;
 
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.yuypc.easyblog.common.convention.result.Result;
 import com.yuypc.easyblog.common.convention.result.Results;
 import com.yuypc.easyblog.dto.req.ArticleListReqDTO;
 import com.yuypc.easyblog.dto.req.ArticleUploadReqDTO;
+import com.yuypc.easyblog.dto.resp.ArticleDetailRespDTO;
 import com.yuypc.easyblog.dto.resp.ArticleRespDTO;
 import com.yuypc.easyblog.service.ArticleService;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,10 +33,16 @@ public class ArticleController {
      * 获取文章列表
      */
     @PostMapping("/list")
-    public Result<List<ArticleRespDTO>> list(@RequestBody ArticleListReqDTO articleListReqDTO) {
+    public Result<IPage<ArticleRespDTO>> list(@RequestBody ArticleListReqDTO articleListReqDTO) {
         return Results.success(articleService.getMultiArticles(articleListReqDTO));
     }
 
-
+    /**
+     * 获取文章详情
+     */
+    @GetMapping("/{id}")
+    public Result<ArticleDetailRespDTO> detail(@PathVariable Long id){
+        return Results.success(articleService.getArticleDetail(id));
+    }
 
 }

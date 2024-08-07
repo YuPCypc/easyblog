@@ -9,7 +9,7 @@ public class UserRespVO {
     /**
      * id
      */
-    private Long id;
+    private String id;
 
     /**
      * nickname

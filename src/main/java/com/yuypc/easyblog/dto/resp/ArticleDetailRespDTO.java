@@ -2,35 +2,29 @@ package com.yuypc.easyblog.dto.resp;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Builder
 @Data
-public class ArticleRespDTO {
-    /**
-     * id
-     */
-    private String id;
-
+public class ArticleDetailRespDTO {
     /**
      * title
      */
     private String title;
 
     /**
-     * summary
+     * content
      */
-    private String summary;
+    private String content;
 
     /**
-     * author_id
-     */
-    private Long authorId;
-
-    /**
-     * userVo
+     * 用户信息
      */
     private UserRespVO userRespVO;
+
+    /**
+     * category_id
+     */
+    private Long categoryId;
 
     /**
      * like_count

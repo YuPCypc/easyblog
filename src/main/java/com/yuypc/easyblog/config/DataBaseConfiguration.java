@@ -17,7 +17,6 @@ public class DataBaseConfiguration {
      * 分页插件
      */
     @Bean
-    @ConditionalOnBean
     public MybatisPlusInterceptor mybatisPlusInterceptorByAdmin() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));

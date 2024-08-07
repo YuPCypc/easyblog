@@ -30,7 +30,10 @@ public enum BaseErrorCode implements IErrorCode {
 
     PASSWORD_INCORRECT_ERROR("A000123", "密码错误"),
 
-    ARTICLE_SAVE_ERROR("A000140", "文章保存失败"),
+
+    ARTICLE_NOT_EXIST_ERROR("A000141", "文章不存在"),
+
+    ARTICLE_SAVE_ERROR("A000142", "文章保存失败"),
     PHONE_VERIFY_ERROR("A000151", "手机格式校验失败"),
 
 
