@@ -19,9 +19,14 @@ import com.yuypc.easyblog.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+import java.util.concurrent.TimeUnit;
+
+import static com.yuypc.easyblog.common.constant.RedisCacheConstant.ARTICLE_VIEW_KEY_PREFIX;
 import static com.yuypc.easyblog.common.convention.errcode.BaseErrorCode.ARTICLE_NOT_EXIST_ERROR;
 import static com.yuypc.easyblog.common.convention.errcode.BaseErrorCode.ARTICLE_SAVE_ERROR;
 import static java.lang.Integer.parseInt;
@@ -31,6 +36,12 @@ import static java.lang.Integer.parseInt;
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> implements ArticleService {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+
+
 
     @Override
     public Void save(ArticleUploadReqDTO articleUploadReqDTO) {
@@ -108,5 +119,36 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
                 .categoryId(articleDO.getCategoryId())
                 .build();
         return articleDetailRespDTOInner;
+    }
+
+    @Override
+    public Void incrementViewCount(Long articleId) {
+        String redisKey = ARTICLE_VIEW_KEY_PREFIX + articleId;
+        redisTemplate.opsForValue().increment(redisKey);
+        return null;
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void incrementViewCountOnDB(Long articleId, Long viewIncrement){
+        baseMapper.incrementViewCountOnDB(articleId, viewIncrement);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Void incrementLikeCount(Long articleId) {
+        baseMapper.incrementLikeCount(articleId);
+        String currentUsername = userService.getCurrentUsername();
+        UserRespDTO user = userService.getUserByUsername(currentUsername);
+        Long userId = user.getId();
+
+        return null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Void incrementCollectCount(Long articleId) {
+        return null;
     }
 }

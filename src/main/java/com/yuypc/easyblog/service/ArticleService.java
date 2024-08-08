@@ -6,7 +6,6 @@ import com.yuypc.easyblog.dto.req.ArticleUploadReqDTO;
 import com.yuypc.easyblog.dto.resp.ArticleDetailRespDTO;
 import com.yuypc.easyblog.dto.resp.ArticleRespDTO;
 
-import java.util.List;
 
 public interface ArticleService {
 
@@ -23,5 +22,30 @@ public interface ArticleService {
      */
     IPage<ArticleRespDTO> getMultiArticles(ArticleListReqDTO articleListReqDTO);
 
+    /**
+     * 获取文章详情
+     */
     ArticleDetailRespDTO getArticleDetail(Long id);
+
+    /**
+     * 更新文章阅读量
+     */
+    Void incrementViewCount(Long articleId);
+
+
+    /**
+     * 更新文章阅读量持久化到数据库
+     */
+    void incrementViewCountOnDB(Long articleId, Long increment);
+
+    /**
+     * 更新文章点赞数
+     */
+    Void incrementLikeCount(Long articleId);
+
+    /**
+     * 更新文章收藏量
+     */
+    Void incrementCollectCount(Long articleId);
+
 }
