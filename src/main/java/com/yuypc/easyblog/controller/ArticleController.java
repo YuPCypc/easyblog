@@ -53,4 +53,19 @@ public class ArticleController {
         return Results.success(articleService.incrementViewCount(id));
     }
 
+    /**
+     * 更新文章点赞数
+     */
+    @PutMapping("/{id}/like")
+    public Result<Void> toggleLikeCount(@PathVariable Long id) {
+        return Results.success(articleService.toggleLikeCount(id));
+    }
+    /**
+     * 更新文章收藏数
+     */
+    @PutMapping("/{id}/collect")
+    public Result<Void> toggleFavorCount(@PathVariable Long id) {
+        return Results.success(articleService.toggleFavorCount(id));
+    }
+
 }

@@ -47,4 +47,14 @@ public class ArticleDetailRespDTO {
      * update_time
      */
     private Date updateTime;
+
+    /**
+     * 是否点赞
+     */
+    private Boolean hasThumb;
+
+    /**
+     * 是否有收藏
+     */
+    private Boolean hasFavour;
 }

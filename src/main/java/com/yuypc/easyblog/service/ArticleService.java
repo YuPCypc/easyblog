@@ -41,11 +41,11 @@ public interface ArticleService {
     /**
      * 更新文章点赞数
      */
-    Void incrementLikeCount(Long articleId);
+    Void toggleLikeCount(Long articleId);
 
     /**
      * 更新文章收藏量
      */
-    Void incrementCollectCount(Long articleId);
+    Void toggleFavorCount(Long articleId);
 
 }

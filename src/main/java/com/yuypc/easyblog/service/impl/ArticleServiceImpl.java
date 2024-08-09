@@ -1,13 +1,18 @@
 package com.yuypc.easyblog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yuypc.easyblog.common.convention.exception.ClientException;
 import com.yuypc.easyblog.common.convention.exception.ServiceException;
 import com.yuypc.easyblog.dao.entity.ArticleDO;
+import com.yuypc.easyblog.dao.entity.FavorDO;
+import com.yuypc.easyblog.dao.entity.LikeDO;
 import com.yuypc.easyblog.dao.mapper.ArticleMapper;
+import com.yuypc.easyblog.dao.mapper.FavorMapper;
+import com.yuypc.easyblog.dao.mapper.LikeMapper;
 import com.yuypc.easyblog.dto.req.ArticleListReqDTO;
 import com.yuypc.easyblog.dto.req.ArticleUploadReqDTO;
 import com.yuypc.easyblog.dto.resp.ArticleDetailRespDTO;
@@ -24,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static com.yuypc.easyblog.common.constant.RedisCacheConstant.ARTICLE_VIEW_KEY_PREFIX;
@@ -40,8 +46,11 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private LikeMapper likeMapper;
 
-
+    @Autowired
+    private FavorMapper favorMapper;
 
     @Override
     public Void save(ArticleUploadReqDTO articleUploadReqDTO) {
@@ -108,6 +117,10 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
         if (articleDO == null) {
             throw new ClientException(ARTICLE_NOT_EXIST_ERROR);
         }
+        String currentUsername = userService.getCurrentUsername();
+        UserRespDTO user = userService.getUserByUsername(currentUsername);
+        Long userId = user.getId();
+
         ArticleDetailRespDTO articleDetailRespDTOInner = ArticleDetailRespDTO.builder()
                 .title(articleDO.getTitle())
                 .content(articleDO.getContent())
@@ -118,6 +131,24 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
                 .updateTime(articleDO.getUpdateTime())
                 .categoryId(articleDO.getCategoryId())
                 .build();
+        // 查询用户是否已经点赞
+        LambdaQueryWrapper<LikeDO> queryWrapper = Wrappers.lambdaQuery(LikeDO.class)
+                .eq(LikeDO::getUserId, userId)
+                .eq(LikeDO::getArticleId, id);
+        LikeDO likeRecord = likeMapper.selectOne(queryWrapper);
+        if (likeRecord != null&& !likeRecord.getIsDeleted()) {
+            articleDetailRespDTOInner.setHasThumb(true);
+        }
+
+        // 查询用户是否已收藏
+        LambdaQueryWrapper<FavorDO> queryWrapper1 = Wrappers.lambdaQuery(FavorDO.class)
+                .eq(FavorDO::getUserId, userId)
+                .eq(FavorDO::getArticleId, id);
+        FavorDO favorRecord = favorMapper.selectOne(queryWrapper1);
+        if (favorRecord != null&& !favorRecord.getIsDeleted()) {
+            articleDetailRespDTOInner.setHasFavour(true);
+        }
+
         return articleDetailRespDTOInner;
     }
 
@@ -137,18 +168,101 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Void incrementLikeCount(Long articleId) {
-        baseMapper.incrementLikeCount(articleId);
+    public Void toggleLikeCount(Long articleId) {
         String currentUsername = userService.getCurrentUsername();
         UserRespDTO user = userService.getUserByUsername(currentUsername);
         Long userId = user.getId();
+
+        // 查询用户是否已经点赞
+        LambdaQueryWrapper<LikeDO> queryWrapper = Wrappers.lambdaQuery(LikeDO.class)
+                .eq(LikeDO::getUserId, userId)
+                .eq(LikeDO::getArticleId, articleId);
+
+        LikeDO likeRecord = likeMapper.selectOne(queryWrapper);
+
+        if (likeRecord == null) {
+            // 如果用户没有点赞记录，插入一条新记录
+            LikeDO newLike = new LikeDO();
+            newLike.setUserId(userId);
+            newLike.setArticleId(articleId);
+            newLike.setIsDeleted(false);
+            likeMapper.insert(newLike);
+
+            // 更新文章的点赞计数
+            baseMapper.incrementLikeCount(articleId);
+        } else if (likeRecord.getIsDeleted()) {
+            // 如果用户已经点赞但被标记为删除，恢复点赞
+            likeMapper.restoreLike(userId, articleId);
+
+            // 更新文章的点赞计数
+            baseMapper.incrementLikeCount(articleId);
+        } else {
+            // 用户已经点赞且未删除，执行取消点赞
+            likeRecord.setIsDeleted(true);
+            likeRecord.setDeleteTime(LocalDateTime.now());
+            // 使用条件更新而不是根据 ID 更新
+            LambdaUpdateWrapper<LikeDO> updateWrapper = Wrappers.lambdaUpdate(LikeDO.class)
+                    .eq(LikeDO::getUserId, userId)
+                    .eq(LikeDO::getArticleId, articleId)
+                    .set(LikeDO::getIsDeleted, true)
+                    .set(LikeDO::getDeleteTime, LocalDateTime.now());
+
+            likeMapper.update(likeRecord, updateWrapper);
+
+            // 减少文章的点赞计数
+            baseMapper.decrementLikeCount(articleId);
+        }
 
         return null;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Void incrementCollectCount(Long articleId) {
+    public Void toggleFavorCount(Long articleId) {
+        String currentUsername = userService.getCurrentUsername();
+        UserRespDTO user = userService.getUserByUsername(currentUsername);
+        Long userId = user.getId();
+
+        // 查询用户是否已经收藏
+        LambdaQueryWrapper<FavorDO> queryWrapper = Wrappers.lambdaQuery(FavorDO.class)
+                .eq(FavorDO::getUserId, userId)
+                .eq(FavorDO::getArticleId, articleId);
+
+        FavorDO favorRecord = favorMapper.selectOne(queryWrapper);
+
+        if (favorRecord == null) {
+            // 如果用户没有收藏记录，插入一条新记录
+            FavorDO newFavor = new FavorDO();
+            newFavor.setUserId(userId);
+            newFavor.setArticleId(articleId);
+            newFavor.setIsDeleted(false);
+            favorMapper.insert(newFavor);
+
+            // 更新文章的收藏计数
+            baseMapper.incrementCollectCount(articleId);
+        } else if (favorRecord.getIsDeleted()) {
+            // 如果用户已经点赞但被标记为删除，恢复点赞
+            favorMapper.restoreFavor(userId, articleId);
+
+            // 更新文章的收藏计数
+            baseMapper.incrementCollectCount(articleId);
+        } else {
+            // 用户已经收藏且未删除，执行取消收藏
+            favorRecord.setIsDeleted(true);
+            favorRecord.setDeleteTime(LocalDateTime.now());
+            // 使用条件更新而不是根据 ID 更新
+            LambdaUpdateWrapper<FavorDO> updateWrapper = Wrappers.lambdaUpdate(FavorDO.class)
+                    .eq(FavorDO::getUserId, userId)
+                    .eq(FavorDO::getArticleId, articleId)
+                    .set(FavorDO::getIsDeleted, true)
+                    .set(FavorDO::getDeleteTime, LocalDateTime.now());
+
+            favorMapper.update(favorRecord, updateWrapper);
+
+            // 减少文章的收藏计数
+            baseMapper.decrementCollectCount(articleId);
+        }
+
         return null;
     }
 }
