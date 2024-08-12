@@ -20,4 +20,10 @@ public interface ArticleMapper extends BaseMapper<ArticleDO> {
 
     @Update("UPDATE articles SET like_count = like_count - 1 WHERE id = #{articleId}")
     void decrementLikeCount(@Param("articleId") Long articleId);
+
+    @Update("UPDATE articles SET comment_count = comment_count + 1 WHERE id = #{articleId}")
+    void incrementCommentCount(Long articleId);
+
+    @Update("UPDATE articles SET comment_count = comment_count - 1 WHERE id = #{articleId}")
+    void decrementCommentCount(Long articleId);
 }
