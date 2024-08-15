@@ -2,6 +2,7 @@ package com.yuypc.easyblog.service.impl;
 
 import com.yuypc.easyblog.dto.resp.UserRespDTO;
 import com.yuypc.easyblog.service.UserService;
+import com.yuypc.easyblog.utils.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,7 +22,8 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
+                user.getId(),
                 user.getUsername(),
                 user.getPassword(),
                 new ArrayList<>()

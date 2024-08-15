@@ -54,8 +54,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
     @Override
     public Void save(ArticleUploadReqDTO articleUploadReqDTO) {
         // 获取当前用户信息
-        String username = userService.getCurrentUsername();
-        UserRespDTO user = userService.getUserByUsername(username);
+        Long userId = userService.getCurrentUserId();
+        UserRespDTO user = userService.getUserById(userId);
         ArticleDO articleDO = ArticleDO.builder().
                 title(articleUploadReqDTO.getTitle()).
                 content(articleUploadReqDTO.getContent()).
@@ -100,7 +100,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
                                     .id(value)
                                     .title(articleDO.getTitle())
                                     .summary(articleDO.getSummary())
-                                    .authorId(articleDO.getAuthorId())
+                                    .authorId(articleDO.getAuthorId().toString())
                                     .userRespVO(getUserRespVOById(articleDO.getAuthorId())) // 获取 UserRespVO
                                     .likeCount(articleDO.getLikeCount())
                                     .viewCount(articleDO.getViewCount())
@@ -116,9 +116,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
         if (articleDO == null) {
             throw new ClientException(ARTICLE_NOT_EXIST_ERROR);
         }
-        String currentUsername = userService.getCurrentUsername();
-        UserRespDTO user = userService.getUserByUsername(currentUsername);
-        Long userId = user.getId();
+        Long userId = userService.getCurrentUserId();
 
         ArticleDetailRespDTO articleDetailRespDTOInner = ArticleDetailRespDTO.builder()
                 .title(articleDO.getTitle())
@@ -168,9 +166,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Void toggleLikeCount(Long articleId) {
-        String currentUsername = userService.getCurrentUsername();
-        UserRespDTO user = userService.getUserByUsername(currentUsername);
-        Long userId = user.getId();
+        Long userId = userService.getCurrentUserId();
 
         // 查询用户是否已经点赞
         LambdaQueryWrapper<LikeDO> queryWrapper = Wrappers.lambdaQuery(LikeDO.class)
@@ -218,9 +214,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, ArticleDO> im
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Void toggleFavorCount(Long articleId) {
-        String currentUsername = userService.getCurrentUsername();
-        UserRespDTO user = userService.getUserByUsername(currentUsername);
-        Long userId = user.getId();
+        Long userId = userService.getCurrentUserId();
 
         // 查询用户是否已经收藏
         LambdaQueryWrapper<FavorDO> queryWrapper = Wrappers.lambdaQuery(FavorDO.class)

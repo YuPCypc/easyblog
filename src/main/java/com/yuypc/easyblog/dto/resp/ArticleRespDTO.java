@@ -25,7 +25,7 @@ public class ArticleRespDTO {
     /**
      * author_id
      */
-    private Long authorId;
+    private String authorId;
 
     /**
      * userVo

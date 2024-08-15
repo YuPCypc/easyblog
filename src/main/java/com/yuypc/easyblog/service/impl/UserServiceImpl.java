@@ -12,6 +12,7 @@ import com.yuypc.easyblog.dto.req.UserRegisterReqDTO;
 import com.yuypc.easyblog.dto.req.UserUpdateReqDTO;
 import com.yuypc.easyblog.dto.resp.*;
 import com.yuypc.easyblog.service.UserService;
+import com.yuypc.easyblog.utils.security.CustomUserDetails;
 import com.yuypc.easyblog.utils.security.JwtTokenProvider;
 import com.yuypc.easyblog.utils.security.PasswordUtil;
 import com.yuypc.easyblog.utils.security.SaltGenerator;
@@ -29,6 +30,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    public Long getCurrentUserId(){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            return ((CustomUserDetails) principal).getUserId();
+        } else {
+            return null;
+        }
+    }
+
 
     public String getCurrentUsername() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -43,6 +53,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     public UserRespVO getUserByUserId(Long authorId) {
         UserDO userDO = baseMapper.selectById(authorId);
         return BeanUtil.toBean(userDO, UserRespVO.class);
+    }
+
+    @Override
+    public UserRespDTO getUserById(Long authorId) {
+        UserDO user = baseMapper.selectById(authorId);
+        if (user == null) {
+            throw new ClientException(USER_NOT_FOUND_ERROR);
+        }
+        return BeanUtil.toBean(user, UserRespDTO.class);
     }
 
     @Override
@@ -98,8 +117,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void update(UserUpdateReqDTO requestParam) {
-        String currentUsername = getCurrentUsername();
-        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getUsername, currentUsername);
+        Long userID = getCurrentUserId();
+        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class).eq(UserDO::getId, userID);
         UserDO user = baseMapper.selectOne(queryWrapper);
         user.setNickname(requestParam.getNickname());
         user.setEmail(requestParam.getEmail());

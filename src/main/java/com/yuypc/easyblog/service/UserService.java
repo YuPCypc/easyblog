@@ -71,5 +71,8 @@ public interface UserService extends IService<UserDO> {
 
     String getCurrentUsername();
 
+    Long getCurrentUserId();
+
+    UserRespDTO getUserById(Long authorId);
     UserRespVO getUserByUserId(Long authorId);
 }
